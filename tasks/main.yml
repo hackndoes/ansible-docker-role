@@ -3,6 +3,9 @@
   - include_vars: vars/registrycrt.yml
     when: self_signed_registry
 
+  - name: install python 2.7
+    apt: name=python2.7 state=installed
+
   - name: enable ssh server in firewall
     ufw: rule=allow name=OpenSSH
     
@@ -21,8 +24,12 @@
   - name: install docker engine {{ docker_engine_version }} 
     apt: name="docker-engine={{ docker_engine_version }}-0~trusty" state=installed update_cache=yes
 
+  - stat: path=/tmp/ez_setup.py
+    register: stat_result
+
   - name: download ez_setup.py
     get_url: url=https://bootstrap.pypa.io/ez_setup.py dest=/tmp/ez_setup.py
+    when: not stat_result.stat.exists
 
   - name: stat easy_install file
     stat: path=/usr/local/bin/easy_install
